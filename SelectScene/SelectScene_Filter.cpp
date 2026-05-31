@@ -139,25 +139,50 @@ BOOL func_WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, AviUtl:
 
 						// Il pulsante è stato premuto, quindi cambia scena.
 
-						// Vedendo se il filtro esiste effettivamente
-						AviUtl::FilterPlugin* exeditFilter = g_auin.GetFilter(fp, "Mod.Avan");
+						/*
 
-						if (exeditFilter == nullptr)
-							// andando in fallback con un altro if statement 
-							AviUtl::FilterPlugin* exeditFilter = g_auin.GetFilter(fp, "Adv.Edit");
+							Vecchio metodo
+
+							// Vedendo se il filtro esiste effettivamente
+							AviUtl::FilterPlugin* exeditFilter = g_auin.GetFilter(fp, "Mod.Avan");
+
+							if (exeditFilter == nullptr)
+								// andando in fallback con un altro if statement 
+								AviUtl::FilterPlugin* exeditFilter = g_auin.GetFilter(fp, "Adv.Edit");
 						
 
-						if (exeditFilter == nullptr)
-							AviUtl::FilterPlugin* exeditFilter = g_auin.GetFilter(fp, "Advanced Editing");
+							if (exeditFilter == nullptr)
+								AviUtl::FilterPlugin* exeditFilter = g_auin.GetFilter(fp, "Advanced Editing");
 						
 						
-						if (exeditFilter == nullptr)
+							if (exeditFilter == nullptr)
+								MessageBoxA(hwnd,
+									"Impossibile trovare la finestra di Exedit con i titoli: (Mod.Avan/Adv.Edit/Advanced Editing)",
+									"Errore di SelectScene", MB_OK | MB_ICONERROR);
+								break;
+						
+							*/
+
+						constexpr const char* filterNames[] = {
+							"Mod.Avan",
+							"Adv.Edit",
+							"Advanced Editing"
+						};
+
+						AviUtl::FilterPlugin* exeditFilter = nullptr;
+
+						for (const char* name : filterNames) {
+							exeditFilter = g_auin.GetFilter(fp, name);
+							if (exeditFilter != nullptr) break;
+						}
+
+						g_auin.SetScene(g_dragScene, exeditFilter, editp);
+
+						if (exeditFilter == nullptr) {
 							MessageBoxA(hwnd,
 								"Impossibile trovare la finestra di Exedit con i titoli: (Mod.Avan/Adv.Edit/Advanced Editing)",
 								"Errore di SelectScene", MB_OK | MB_ICONERROR);
-							break;
-						
-						g_auin.SetScene(g_dragScene, exeditFilter, editp);
+						}
 
 						// Ridisegna la finestra di anteprima di AviUtl.
 						::PostMessage(hwnd, AviUtl::FilterPlugin::WindowMessage::Command, 0, 0);
